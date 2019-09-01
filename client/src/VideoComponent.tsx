@@ -165,7 +165,7 @@ export default class VideoComponent extends Component<Props, State> {
 	}
 
 	componentDidMount() {
-		axios.get('http://localhost:3001/token').then(results => {
+		axios.get('/token').then(results => {
 			const { identity, token } = results.data;
 			this.setState({ identity, token });
 		});
