@@ -1,0 +1,11 @@
+{
+    "name": "demo",
+    "version": "1.0.0",
+    "description": "hosted server",
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+      "dotenv": "^8.1.0",
+    }
+  }
+  
