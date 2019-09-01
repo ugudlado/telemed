@@ -22,7 +22,8 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "deploy": "mkdir -p ../server/public && cp -r ./build/* ../server/public"
+    "deploy": "mkdir -p ../server/public && cp -r ./build/* ../server/public",
+    "postinstall": "npm run build && npm run deploy"
   },
   "eslintConfig": {
     "extends": "react-app"
