@@ -20,16 +20,18 @@ export interface State {
     previewTracks?:LocalTrack[] | MediaStreamTrack[];
     localMediaAvailable:boolean;
     hasJoinedRoom:boolean;
-    activeRoom?:Room;
-    token:string;
+	activeRoom?:Room;
+	recording:boolean;
+	token:string;
+	downloadLink:string;
 }
 
 type AudioVideoTrackPublication = LocalAudioTrackPublication | LocalVideoTrackPublication | RemoteAudioTrackPublication | RemoteVideoTrackPublication;
 
 
 export default class VideoComponent extends Component<Props, State> {
-    localMediaRef = createRef<HTMLDivElement>()
-    remoteMediaRef = createRef<HTMLDivElement>()
+    localMediaRef = createRef<HTMLDivElement>();
+	remoteMediaRef = createRef<HTMLDivElement>();
 	constructor(props: Props) {
 		super(props);
 		this.state = {
@@ -38,7 +40,9 @@ export default class VideoComponent extends Component<Props, State> {
 			roomNameErr: false, // Track error for room name TextField
 			token:'',
 			localMediaAvailable: false,
-			hasJoinedRoom: false
+			hasJoinedRoom: false,
+			recording:false,
+			downloadLink:''
 		};
 		this.joinRoom = this.joinRoom.bind(this);
 		this.handleRoomNameChange = this.handleRoomNameChange.bind(this);
@@ -47,6 +51,9 @@ export default class VideoComponent extends Component<Props, State> {
 		this.detachTracks = this.detachTracks.bind(this);
 		this.detachParticipantTracks = this.detachParticipantTracks.bind(this);
 		this.onParticipantConnected = this.onParticipantConnected.bind(this);
+		this.connect = this.connect.bind(this);
+		this.getAxiosConfig = this.getAxiosConfig.bind(this);
+		this.waitForRecording = this.waitForRecording.bind(this);
 	}
 
 	handleRoomNameChange(e:ChangeEvent<HTMLInputElement>) {
@@ -54,29 +61,44 @@ export default class VideoComponent extends Component<Props, State> {
 		this.setState({ roomName });
 	}
 
+	connect() {
+		console.log("Joining room '" + this.state.roomName + "'...");
+			const connectOptions:ConnectOptions =
+			{
+				name: this.state.roomName,
+				video: { width : 1000 },
+				
+			};
+
+			if (this.state.previewTracks) {
+				connectOptions.tracks = this.state.previewTracks;
+			}
+
+			// Join the Room with the token from the server and the
+			// LocalParticipant's Tracks.
+			Video.connect(this.state.token, connectOptions).then(this.roomJoined, error => {
+				alert('Could not connect to Twilio: ' + error.message);
+			});
+	}
+
 	joinRoom() {
 		if (!this.state.roomName.trim()) {
 			this.setState({ roomNameErr: true });
 			return;
 		}
+		let self = this;
 
-		console.log("Joining room '" + this.state.roomName + "'...");
-        const connectOptions:ConnectOptions =
-         {
-			name: this.state.roomName,
-			video: { width : 1000 },
-			
-		};
-
-		if (this.state.previewTracks) {
-			connectOptions.tracks = this.state.previewTracks;
-		}
-
-		// Join the Room with the token from the server and the
-		// LocalParticipant's Tracks.
-		Video.connect(this.state.token, connectOptions).then(this.roomJoined, error => {
-			alert('Could not connect to Twilio: ' + error.message);
+		axios.post('/createRoom',{"uniqueName":this.state.roomName}, this.getAxiosConfig()).then((response)=>{
+			self.connect();
+		}).catch((error)=>{
+			//room already exist
+			if(error && error.code === 53113) {
+				self.connect();
+			} else {
+				console.log(error);
+			}
 		});
+		
 	}
 
 	//Unable to fix the type of track
@@ -119,7 +141,8 @@ export default class VideoComponent extends Component<Props, State> {
 		});
 	}
 
-	roomJoined(room: Video.Room) { 
+	roomJoined(room: Video.Room) {	
+		
 		// Called when a participant joins a room
 		console.log("Joined as '" + this.state.identity + "'");
 		this.setState({
@@ -164,6 +187,7 @@ export default class VideoComponent extends Component<Props, State> {
 		console.log("Joining: '" + participant.identity + "'");
 
 		participant.on('trackSubscribed', track=>{
+		
 			console.log('Track subscribed');
 			console.log(track);
 			let element = track.attach();
@@ -188,22 +212,58 @@ export default class VideoComponent extends Component<Props, State> {
 		});	
 	}
 
-	componentDidMount() {
+	getAxiosConfig() {
 		//hack for localhost
 		var config = {baseURL:''}
 		if(window.location.hostname === 'localhost') {
 			config.baseURL = 'http://localhost:3000'
-		}
+		} 
+		return config;
+	}
 
-		axios.get('/token', config).then(results => {
+	componentDidMount() {
+		
+		axios.get('/token', this.getAxiosConfig()).then(results => {
 			const { identity, token } = results.data;
 			this.setState({ identity, token });
 		});
 	}
 
 	leaveRoom() {
-		this.state.activeRoom!.disconnect();
+		if(this.state.activeRoom) {
+
+			let room : Room  = this.state.activeRoom;
+			let self = this;
+			room.disconnect();
+			if(room.participants.size === 0) {
+				axios.post('/closeRoom', {"roomSid": room.sid } ,this.getAxiosConfig()).then(results=>{
+					console.log(results);
+
+					axios.post('/recording',{"roomSid": room.sid},this.getAxiosConfig()).then((recordResult:any)=>{
+						console.log(recordResult);
+						this.waitForRecording(recordResult.data.sid);
+					});
+				});
+				
+			}
+	
+		}
 		this.setState({ hasJoinedRoom: false, localMediaAvailable: false });
+	}
+
+	waitForRecording(compositionId: string){
+		let self = this;
+		axios.get('/compositions?compositionId=' + compositionId, this.getAxiosConfig()).then(res=>{
+				if(res.data.status === 'completed') {
+				axios.get('/download?compositionId=' + compositionId, this.getAxiosConfig()).then(download=>{
+					console.log(download);
+					self.setState({recording:true, downloadLink : download.data.redirect_to});
+				});
+			} else {
+				//TODO: add timeout and intervals
+				this.waitForRecording(compositionId);
+			}
+		});
 	}
 
 
@@ -233,6 +293,8 @@ export default class VideoComponent extends Component<Props, State> {
 						<div className="participants-section">
 						{ this.state.localMediaAvailable && <div ref={this.localMediaRef} />}
 						</div>
+
+						{this.state.recording && <a href={this.state.downloadLink}>Download recording</a>}
 					</div>
 		);
 	}
