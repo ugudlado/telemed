@@ -31,3 +31,17 @@
     transform: rotate(360deg);
   }
 }
+
+.main-video {
+  width: 1000px;
+}
+
+.participants-section {
+  height:200px;
+  margin:auto;
+}
+
+.participants-section video {
+  height: 200px;
+  margin:auto;
+}

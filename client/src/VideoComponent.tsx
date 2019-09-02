@@ -65,7 +65,7 @@ export default class VideoComponent extends Component<Props, State> {
          {
 			name: this.state.roomName,
 			video: { width : 1000 },
-			networkQuality : { local :  3, remote : 3}
+			
 		};
 
 		if (this.state.previewTracks) {
@@ -194,6 +194,7 @@ export default class VideoComponent extends Component<Props, State> {
 		if(window.location.hostname === 'localhost') {
 			config.baseURL = 'http://localhost:3000'
 		}
+
 		axios.get('/token', config).then(results => {
 			const { identity, token } = results.data;
 			this.setState({ identity, token });
@@ -207,14 +208,7 @@ export default class VideoComponent extends Component<Props, State> {
 
 
 	render() {
-		// Only show video track after user has joined a room
-		let showLocalTrack = this.state.localMediaAvailable ? (
-			<div className="flex-item">
-				<div ref={this.localMediaRef} />
-			</div>
-		) : (
-			''
-		);
+		
 		// Hide 'Join Room' button if user has already joined a room.
 		let joinOrLeaveRoomButton = this.state.hasJoinedRoom ? (
 			<Button onClick={this.leaveRoom}>Leave Meeting</Button>
@@ -223,7 +217,6 @@ export default class VideoComponent extends Component<Props, State> {
 		);
 		return (
 					<div className="flex-container">
-						{showLocalTrack}
 						<div className="flex-item">
 						{!this.state.hasJoinedRoom && <TextField
 								label="Meeting Id"
@@ -234,7 +227,12 @@ export default class VideoComponent extends Component<Props, State> {
 							<br />
 							{joinOrLeaveRoomButton}
 						</div>
-						<div className="flex-item" ref={this.remoteMediaRef} id="remote-media" />
+						<div className="main-video">
+							<div className="flex-item" ref={this.remoteMediaRef} id="remote-media" />
+						</div>
+						<div className="participants-section">
+						{ this.state.localMediaAvailable && <div ref={this.localMediaRef} />}
+						</div>
 					</div>
 		);
 	}
