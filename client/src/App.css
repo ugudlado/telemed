@@ -34,6 +34,11 @@
 
 .main-video {
   width: 1000px;
+  margin:auto;
+}
+
+.main-video video {
+  width: 1000px;
 }
 
 .participants-section {
