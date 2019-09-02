@@ -60,7 +60,8 @@ export default class VideoComponent extends Component<Props, State> {
 		console.log("Joining room '" + this.state.roomName + "'...");
         const connectOptions:ConnectOptions =
          {
-            name: this.state.roomName
+			name: this.state.roomName,
+			video: { width : 800 }
 		};
 
 		if (this.state.previewTracks) {
@@ -184,7 +185,12 @@ export default class VideoComponent extends Component<Props, State> {
 	}
 
 	componentDidMount() {
-		axios.get('/token').then(results => {
+		//hack for localhost
+		var config = {baseURL:''}
+		if(window.location.hostname == 'localhost') {
+			config.baseURL = 'http://localhost:3000'
+		}
+		axios.get('/token', config).then(results => {
 			const { identity, token } = results.data;
 			this.setState({ identity, token });
 		});
