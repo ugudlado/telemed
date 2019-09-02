@@ -1,8 +1,9 @@
-import React, { Component, createRef, ChangeEvent } from 'react';
+import React, { Component, createRef, ChangeEvent, createElement } from 'react';
 import Video, {  Room, ConnectOptions, LocalTrack, Participant,
-	 LocalVideoTrack, LocalAudioTrack, LocalVideoTrackPublication, LocalAudioTrackPublication
+	 LocalVideoTrack, LocalAudioTrack, LocalVideoTrackPublication, LocalAudioTrackPublication, RemoteAudioTrackPublication, RemoteVideoTrackPublication, RemoteTrackPublication
 	} from 'twilio-video';
 import axios from 'axios';
+import { ContentSelectAll } from 'material-ui/svg-icons';
 
 
 export interface Props {
@@ -20,6 +21,7 @@ export interface State {
     token:string;
 }
 
+type AudioVideoTrackPublication = LocalAudioTrackPublication | LocalVideoTrackPublication | RemoteAudioTrackPublication | RemoteVideoTrackPublication;
 
 
 export default class VideoComponent extends Component<Props, State> {
@@ -41,6 +43,7 @@ export default class VideoComponent extends Component<Props, State> {
 		this.leaveRoom = this.leaveRoom.bind(this);
 		this.detachTracks = this.detachTracks.bind(this);
 		this.detachParticipantTracks = this.detachParticipantTracks.bind(this);
+		this.onParticipantConnected = this.onParticipantConnected.bind(this);
 	}
 
 	handleRoomNameChange(e:ChangeEvent<HTMLInputElement>) {
@@ -73,13 +76,16 @@ export default class VideoComponent extends Component<Props, State> {
 
 	//Unable to fix the type of track
 	attachTrack(track: any,conatiner: Element) {
-		let newTrack : LocalVideoTrackPublication | LocalAudioTrackPublication  = track;
-		conatiner.appendChild(newTrack.track.attach());
+		let newTrack:AudioVideoTrackPublication = track;
+		if(newTrack.track) {
+			conatiner.appendChild(newTrack.track.attach());
+		}
 	}
 
 	detachTrack(track: any) {
-		let newTrack : LocalVideoTrackPublication | LocalAudioTrackPublication = track;
-		newTrack.track.detach().forEach((detachedElement : HTMLElement)=> {
+		let newTrack : AudioVideoTrackPublication = track;
+		
+		newTrack.track && newTrack.track.detach().forEach((detachedElement : HTMLElement)=> {
 			detachedElement.remove();
 		})
 	}
@@ -99,7 +105,13 @@ export default class VideoComponent extends Component<Props, State> {
 
 	detachParticipantTracks(participant: Participant) {
 		var tracks = Array.from(participant.tracks.values());
-		this.detachTracks(tracks);
+		tracks.forEach(track=> {
+			console.log(track.trackSid);
+			let element = document.getElementById(track.trackSid);
+			if(element) {
+				element.remove();
+			}
+		});
 	}
 
 	roomJoined(room: Video.Room) { 
@@ -112,38 +124,17 @@ export default class VideoComponent extends Component<Props, State> {
 		});
 
         // Attach LocalParticipant's Tracks, if not already attached.
-        
 		if (!this.localMediaRef.current!.querySelector('video')) {
 			this.attachParticipantTracks(room.localParticipant, this.localMediaRef);
 		}
 
 		// Attach the Tracks of the Room's Participants.
-		room.participants.forEach((participant) => {
-			console.log("Already in Room: '" + participant.identity + "'");
-			var previewContainer = this.remoteMediaRef;
-			this.attachParticipantTracks(participant, previewContainer);
-		});
+		room.participants.forEach(this.onParticipantConnected);
 
 		// When a Participant joins the Room, log the event.
-		room.on('participantConnected', (participant: { identity: string; }) => {
-			console.log("Joining: '" + participant.identity + "'");
-		});
-
-		// When a Participant adds a Track, attach it to the DOM.
-		room.on('trackAdded', (track: { kind: string; }, participant: { identity: string; }) => {
-			console.log(participant.identity + ' added track: ' + track.kind);
-			var previewContainer = this.remoteMediaRef.current!;
-			this.attachTrack(track, previewContainer);
-		});
-
-		// When a Participant removes a Track, detach it from the DOM.
-		room.on('trackRemoved', (track: { kind: string; }, participant: { identity: string; }) => {
-			console.log(participant.identity + ' removed track: ' + track.kind);
-			this.detachTracks([track]);
-		});
+		room.on('participantConnected', this.onParticipantConnected);
 
 		// When a Participant leaves the Room, detach its Tracks.
-		
 		room.on('participantDisconnected', (participant: Participant) => {
 			console.log("Participant '" + participant.identity + "' left the room");
 			this.detachParticipantTracks(participant);
@@ -164,8 +155,39 @@ export default class VideoComponent extends Component<Props, State> {
 		});
 	}
 
+	onParticipantConnected(participant: Participant){
+		console.log("Joining: '" + participant.identity + "'");
+
+		participant.on('trackSubscribed', track=>{
+			console.log('Track subscribed');
+			console.log(track);
+			let element = track.attach();
+			element.id =  track.sid;
+			this.remoteMediaRef.current!.appendChild(element);	
+		});
+
+		participant.on('trackUnsubscribed', track=>{
+			console.log('trackUnsubscribed');
+			console.log(track);
+			
+			this.detachTrack(track);
+		});
+
+		participant.tracks.forEach((track)=>{
+			console.log(track);
+				let remoteTrack =  track as RemoteTrackPublication;
+				
+				if(remoteTrack.isSubscribed) {
+					this.attachTrack(remoteTrack, this.remoteMediaRef.current!);
+				}
+		});	
+	}
+
 	componentDidMount() {
-		axios.get('/token').then(results => {
+		let config = {
+			baseURL : 'http://localhost:3000'
+		}
+		axios.get('/token', config).then(results => {
 			const { identity, token } = results.data;
 			this.setState({ identity, token });
 		});
@@ -175,6 +197,7 @@ export default class VideoComponent extends Component<Props, State> {
 		this.state.activeRoom!.disconnect();
 		this.setState({ hasJoinedRoom: false, localMediaAvailable: false });
 	}
+
 
 	render() {
 		// Only show video track after user has joined a room
