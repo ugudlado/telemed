@@ -1,9 +1,12 @@
-import React, { Component, createRef, ChangeEvent, createElement } from 'react';
+import React, { Component, createRef, ChangeEvent } from 'react';
 import Video, {  Room, ConnectOptions, LocalTrack, Participant,
-	 LocalVideoTrack, LocalAudioTrack, LocalVideoTrackPublication, LocalAudioTrackPublication, RemoteAudioTrackPublication, RemoteVideoTrackPublication, RemoteTrackPublication
+	 LocalVideoTrack, LocalAudioTrack, LocalVideoTrackPublication,
+	  LocalAudioTrackPublication, RemoteAudioTrackPublication, 
+	  RemoteVideoTrackPublication, RemoteTrackPublication
 	} from 'twilio-video';
 import axios from 'axios';
-import { ContentSelectAll } from 'material-ui/svg-icons';
+import Button from '@material-ui/core/Button';
+import TextField from '@material-ui/core/TextField';
 
 
 export interface Props {
@@ -31,7 +34,7 @@ export default class VideoComponent extends Component<Props, State> {
 		super(props);
 		this.state = {
 			identity: '',
-			roomName: '',
+			roomName: 'Default',
 			roomNameErr: false, // Track error for room name TextField
 			token:'',
 			localMediaAvailable: false,
@@ -61,7 +64,8 @@ export default class VideoComponent extends Component<Props, State> {
         const connectOptions:ConnectOptions =
          {
 			name: this.state.roomName,
-			video: { width : 800 }
+			video: { width : 1000 },
+			networkQuality : { local :  3, remote : 3}
 		};
 
 		if (this.state.previewTracks) {
@@ -187,7 +191,7 @@ export default class VideoComponent extends Component<Props, State> {
 	componentDidMount() {
 		//hack for localhost
 		var config = {baseURL:''}
-		if(window.location.hostname == 'localhost') {
+		if(window.location.hostname === 'localhost') {
 			config.baseURL = 'http://localhost:3000'
 		}
 		axios.get('/token', config).then(results => {
@@ -213,18 +217,20 @@ export default class VideoComponent extends Component<Props, State> {
 		);
 		// Hide 'Join Room' button if user has already joined a room.
 		let joinOrLeaveRoomButton = this.state.hasJoinedRoom ? (
-			<input type="button" value="Leave Room" onClick={this.leaveRoom} />
+			<Button onClick={this.leaveRoom}>Leave Meeting</Button>
 		) : (
-			<input type="button" value="Join Room" onClick={this.joinRoom} />
+			<Button onClick={this.joinRoom}>Join Meeting</Button>
 		);
 		return (
 					<div className="flex-container">
 						{showLocalTrack}
 						<div className="flex-item">
-							<input type="text"
-								placeholder="room name"
+						{!this.state.hasJoinedRoom && <TextField
+								label="Meeting Id"
+								value={this.state.roomName}
 								onChange={this.handleRoomNameChange}
-							/>
+								margin="normal"
+							/>}
 							<br />
 							{joinOrLeaveRoomButton}
 						</div>
