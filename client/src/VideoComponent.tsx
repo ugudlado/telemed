@@ -67,7 +67,7 @@ export default class VideoComponent extends Component<Props, State> {
 			{
 				name: this.state.roomName,
 				video: { width : 1000 },
-				
+				audio: true
 			};
 
 			if (this.state.previewTracks) {
@@ -103,6 +103,8 @@ export default class VideoComponent extends Component<Props, State> {
 
 	//Unable to fix the type of track
 	attachTrack(track: any,conatiner: Element) {
+		console.log('Attach tracks');
+		console.log(track);
 		let newTrack:AudioVideoTrackPublication = track;
 		if(newTrack.track) {
 			conatiner.appendChild(newTrack.track.attach());
