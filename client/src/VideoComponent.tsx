@@ -66,7 +66,7 @@ export default class VideoComponent extends Component<Props, State> {
 			const connectOptions:ConnectOptions =
 			{
 				name: this.state.roomName,
-				video: { width : 1000 },
+				video: { width : 720, height: 480 },
 				audio: true
 			};
 

@@ -33,20 +33,24 @@
 }
 
 .main-video {
-  width: 1000px;
+  width: 720px;
   margin:auto;
+  height: 480px;
 }
 
 .main-video video {
   width: 1000px;
+  height: 800px;
 }
 
 .participants-section {
-  height:200px;
+  height:130px;
   margin:auto;
+  width: 720px;
 }
 
 .participants-section video {
-  height: 200px;
+  height: 130px;
   margin:auto;
+  float: left;
 }
