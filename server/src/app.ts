@@ -24,18 +24,13 @@ app.use((req, res, next) => {
 });
 
 const getToken = (user: string) => {
-    const identity = user;
-
     // Create an access token which we will sign and return to the client,
     // containing the grant we just created
     const token = new twilio.jwt.AccessToken(
         process.env.TWILIO_ACCOUNT_SID,
         process.env.TWILIO_API_KEY,
-        process.env.TWILIO_API_SECRET
+        process.env.TWILIO_API_SECRET, {identity : user}
     );
-
-    // Assign the generated identity to the token
-    // token.identity = identity;
 
     const grant = new VideoGrant();
     // Grant token access to the Video API features
