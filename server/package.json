@@ -2,7 +2,7 @@
   "name": "videoserver",
   "version": "1.0.0",
   "description": "hosted server",
-  "main": "dist/index.js",
+  "main": "build/app.js",
   "scripts": {
     "prebuild": "tslint -c tslint.json -p tsconfig.json --fix",
     "build": "tsc",
