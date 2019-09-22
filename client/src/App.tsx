@@ -1,11 +1,13 @@
 import React from 'react';
 import './App.css';
-import VideoComponent from './VideoComponent';
+import Header from './components/Header';
+import Demo from './components/Demo';
 
 const App: React.FC = () => {
   return (
     <div className="App">
-      <VideoComponent />
+      <Header/>
+      <Demo/>
     </div>
   );
 }
