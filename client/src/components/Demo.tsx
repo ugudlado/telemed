@@ -7,6 +7,7 @@ import SearchPatient from './SearchPatient';
 import Video from './VideoComponent';
 import SearchDoctor from './Searchdoctor';
 import Signature from './common/Signature';
+import FormBuilder, {Field, FieldType} from './common/FormBuilder';
 
 type Props = { component: FunctionComponent } & RouteComponentProps;
 
@@ -21,6 +22,22 @@ export default function Demo() {
 
     function ListItemLink(props: ListItemProps<'a', { button?: true }>) {
         return <ListItem button component="a" {...props} />;
+    }
+
+    const FormBuilderDemo :FunctionComponent = () => {
+        const fields:Array<Field> = [
+            {key:"occupation", value:"", label: "Occupation", type:FieldType.Text},
+            {key:"critcalIllness", value:"", label: "Critical Illness", type:FieldType.Text},
+            {key:"gender", value:"", label: "Gender", type:FieldType.RadioGroup, 
+                options:[
+                    {text:"Male", value:"male"},
+                    {text:"Female", value:"female"},
+                ]
+            },
+            {key:"maleQuestion", value:"", label:"Do you smoke?", type:FieldType.Text, when:{key:"gender",matches:"male"}}
+        ];
+
+        return (<FormBuilder fields={fields}/>)
     }
 
     return (
@@ -43,6 +60,9 @@ export default function Demo() {
                     <ListItemLink href="signature">
                         <ListItemText primary="Signature" />
                     </ListItemLink>
+                    <ListItemLink href="questionnaire">
+                        <ListItemText primary="Questionnaire" />
+                    </ListItemLink>
                 </List>
             </Grid>
             <Grid item xs={10} container justify="center">
@@ -52,6 +72,7 @@ export default function Demo() {
                     <Route component={Video} path="videoConference" />
                     <Route component={SearchDoctor} path="chooseDoctor" />
                     <Route component={Signature} path="signature" />
+                    <Route component={FormBuilderDemo} path="questionnaire" />
                 </Router>
             </Grid>
         </Grid>
