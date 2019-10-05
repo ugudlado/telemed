@@ -1,0 +1,66 @@
+{
+	"info": {
+		"name": "elxr-api",
+		"_postman_id": "9a688298-424f-375c-cec9-8bd6e268c94c",
+		"description": "",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "localhost:5000/login",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"mobile\" :\"123\",\n\t\"password\" :\"123456\"\n}"
+				},
+				"url": {
+					"raw": "localhost:5000/login",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"login"
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "localhost:5000/",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"mobile\" :\"123\",\n\t\"password\" :\"123456\"\n}"
+				},
+				"url": {
+					"raw": "localhost:5000/",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						""
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		}
+	]
+}
