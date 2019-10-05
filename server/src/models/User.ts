@@ -4,6 +4,7 @@ class User {
     public mobile: string;
     public name: string;
     public role: string;
+    public password: string;
 }
 
 export default User;

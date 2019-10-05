@@ -7,34 +7,38 @@ const users: User[] = [
         email: "karthik@mail.com",
         mobile: "987",
         name: "Karthik",
-        role: "admin"
+        role: "admin",
+        password: "123456"
     },
     {
         userid: "Mahesh",
         email: "mahesh@mail.com",
         mobile: "456",
         name: "Mahesh",
-        role: "doctor"
+        role: "doctor",
+        password: "123456"
     },
     {
         userid: "Mani",
         email: "mani@mail.com",
         mobile: "123",
         name: "Mani",
-        role: "assistant"
+        role: "assistant",
+        password: "123456"
     },
     {
         userid: "john",
         email: "john@mail.com",
         mobile: "111",
         name: "John",
-        role: "patient"
+        role: "patient",
+        password: "123456"
     }
 ];
 
 class UserService {
     public authenticate(mobile: string, password: string) {
-        const userProfile = users.find((u) => u.mobile === mobile && password === "123456");
+        const userProfile = users.find((u) => u.mobile === mobile && u.password === password);
         if (userProfile) {
             const jwt = new JwtUtility();
             const jwtToken = jwt.generateToken(userProfile);
