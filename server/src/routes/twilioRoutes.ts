@@ -6,9 +6,9 @@ const twilioController = new TwilioController();
 const router = express.Router();
 
 router.get("/token", twilioController.getToken);
-router.get("/createRoom", twilioController.createRoom);
-router.get("/closeRoom", twilioController.closeRoom);
-router.get("/recording", twilioController.sendComposition);
+router.post("/createRoom", twilioController.createRoom);
+router.post("/closeRoom", twilioController.closeRoom);
+router.post("/recording", twilioController.sendComposition);
 router.get("/compositions", twilioController.getCompositionById);
 router.get("/download", twilioController.downloadComposition);
 

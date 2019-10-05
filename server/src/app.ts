@@ -4,8 +4,6 @@ import routes from "./routes";
 
 class App {
   public app: express.Application;
-  public port: number;
-
   constructor() {
     this.app = express();
 
@@ -23,7 +21,8 @@ class App {
     });
   }
 
-  public listen(port: number) {
+  public listen() {
+    const port = process.env.API_PORT;
     this.app.listen(port, () => {
       console.log(`App listening on the port ${port}`);
     });
