@@ -52,6 +52,16 @@ class UserService {
         const jwt = new JwtUtility();
         return jwt.isTokenValid(token);
     }
+
+    public refreshToken(token: string) {
+        const jwt = new JwtUtility();
+        const userProfile = jwt.getObjectFromToken(token);
+        if (userProfile) {
+            return jwt.generateToken(userProfile);
+        } else {
+            return null;
+        }
+    }
 }
 
 export default UserService;

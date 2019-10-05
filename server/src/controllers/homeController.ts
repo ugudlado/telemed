@@ -20,6 +20,15 @@ class HomeController {
       response.status(200).send(jwtToken);
     }
   }
+
+  public refreshToken = (request: express.Request, response: express.Response) => {
+    const refreshedToken = this.userService.refreshToken(request.headers.authorization);
+    if (refreshedToken == null) {
+      response.status(401).send("Invalid token");
+    } else {
+      response.status(200).send(refreshedToken);
+    }
+  }
 }
 
 export default HomeController;

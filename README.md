@@ -23,3 +23,13 @@ cd server
 npm install
 npm run postinstall
 npm start
+
+## API
+
+elxr-api.postman_collection.json contains all sample api calls.
+
+### Useful commands
+* Command to kill node processes
+```sh
+pkill -9 node
+```

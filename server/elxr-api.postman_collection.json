@@ -61,6 +61,38 @@
 				"description": ""
 			},
 			"response": []
+		},
+		{
+			"name": "localhost:5000/refreshtoken",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyaWQiOiJNYW5pIiwiZW1haWwiOiJtYW5pQG1haWwuY29tIiwibW9iaWxlIjoiMTIzIiwibmFtZSI6Ik1hbmkiLCJyb2xlIjoiYXNzaXN0YW50In0.7dR7m6w9UYm_j0CcWM1j9EclRCEBzAbXf6z7XcnoCok"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "localhost:5000/refreshtoken",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"refreshtoken"
+					]
+				},
+				"description": ""
+			},
+			"response": []
 		}
 	]
 }

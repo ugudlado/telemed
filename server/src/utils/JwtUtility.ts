@@ -14,6 +14,16 @@ class JwtUtility {
             return false;
         });
     }
+
+    public getObjectFromToken(token: string) {
+        return this.jwt.verify(token, this.salt, (error: string, decoded: string) => {
+            if (decoded) {
+                return decoded;
+            }
+            console.log(error);
+            return null;
+        });
+    }
 }
 
 export default JwtUtility;
